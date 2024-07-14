@@ -1,0 +1,84 @@
+version: "2"
+
+networks:
+  zeebe_network:
+    driver: bridge
+
+services:
+  postgresql:
+    image: postgres:latest
+    restart: always
+    container_name: postgres_container
+    environment:
+      POSTGRES_DB: exporterTest
+      POSTGRES_USER: exporterTest_user
+      POSTGRES_PASSWORD: exporterTest_password
+    ports:
+      - "5432:5432"
+    # volumes:
+    #   - my_dbdata:/var/lib/postgresql/data
+
+  redis:
+    image: redis:latest
+    command: redis-server --requirepass exampleRedisPassword
+    ports:
+      - "6379:6379"
+    environment:
+      - REDIS_PASSWORD=exampleRedisPassword
+    networks:
+      - zeebe_network
+
+  zeebe:
+    container_name: zeebe_broker
+    image: camunda/zeebe:8.4.0
+    environment:
+      - ZEEBE_LOG_LEVEL=debug
+      - REDIS_HOST=host.docker.internal
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=exampleRedisPassword
+      - RECORD_POSITION_KEY_NAME=gem_key_test
+      - STREAM_NAME=streamExporter
+      - PERIOD_EXPORT_POSITION=2
+      - JOB=true
+      - DEPLOYMENT=true
+      - PROCESS_INSTANCE=true
+      - INCIDENT=false
+      - MESSAGE=false
+      - MESSAGE_SUBSCRIPTION=false
+      - PROCESS_MESSAGE_SUBSCRIPTION=false
+      - JOB_BATCH=false
+      - TIMER=false
+      - MESSAGE_START_EVENT_SUBSCRIPTION=false
+      - VARIABLE=true
+      - VARIABLE_DOCUMENT=false
+      - PROCESS_INSTANCE_CREATION=false
+      - ERROR=false
+      - PROCESS_INSTANCE_RESULT=false
+      - PROCESS=false
+      - DEPLOYMENT_DISTRIBUTION=false
+      - PROCESS_EVENT=false
+      - DECISION=false
+      - DECISION_REQUIREMENTS=false
+      - DECISION_EVALUATION=false
+      - PROCESS_INSTANCE_MODIFICATION=false
+      - ESCALATION=false
+      - SIGNAL_SUBSCRIPTION=false
+      - SIGNAL=false
+      - RESOURCE_DELETION=false
+      - COMMAND_DISTRIBUTION=false
+      - PROCESS_INSTANCE_BATCH=false
+      - MESSAGE_BATCH=false
+      - FORM=false
+      - USER_TASK=false
+      - PROCESS_INSTANCE_MIGRATION=false
+      - COMPENSATION_SUBSCRIPTION=false
+    ports:
+      - "26500:26500"
+      - "9600:9600"
+    volumes:
+      - ../exporter/target/jib/zeebe-redis-exporter-jar-with-dependencies.jar:/usr/local/zeebe/exporters/zeebe-redis-exporter-jar-with-dependencies.jar
+      - ./application.yaml:/usr/local/zeebe/config/application.yaml
+    networks:
+      - zeebe_network
+
+
