@@ -68,7 +68,7 @@ func VariablesToDB(pipe chan VariableRecord) {
 			// jobmng.ToTasklistTaskTable(batchjobRecords)
 			// fmt.Println("-----Perform History Variable Table-----")
 			// mng.VariableManager.TohistoryTable(batchVariableRecords)
-			mng.VariableManager.ToTasklistVariablesTable(batchVariableRecords)
+			// mng.VariableManager.ToTasklistVariablesTable(batchVariableRecords)
 			return
 		}
 	}

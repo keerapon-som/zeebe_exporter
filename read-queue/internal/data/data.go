@@ -8,9 +8,11 @@ type TasklistTask struct {
 	BPMNProcessID       string
 	ProcessDefinitionID string
 	FlowNodeBPMNID      string
+	FlowNodeInstanceId  string
 	ProcessInstanceID   string
 	CreationTime        string
 	CompletionTime      string
+	State               string
 	Assignee            string
 	CandidateGroups     []string
 	CandidateUsers      []string
