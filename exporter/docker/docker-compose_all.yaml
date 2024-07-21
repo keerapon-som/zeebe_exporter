@@ -20,6 +20,8 @@ services:
       POSTGRES_PASSWORD: exporterTest_password
     ports:
       - "5432:5432"
+    volumes:
+      - D:/Programer_eieiza/GemProject/CAMUNDA_CLONE_PROJECT/ZEEBE-EXPORTER/volumnData/postgresData:/var/lib/postgresql/data
 
   zeebe: # https://docs.camunda.io/docs/self-managed/platform-deployment/docker/#zeebe
     image: camunda/zeebe:${CAMUNDA_PLATFORM_VERSION:-8.4.0}
@@ -46,7 +48,7 @@ services:
       - JOB=true
       - DEPLOYMENT=false
       - PROCESS_INSTANCE=false
-      - INCIDENT=false
+      - INCIDENT=true
       - MESSAGE=false
       - MESSAGE_SUBSCRIPTION=false
       - PROCESS_MESSAGE_SUBSCRIPTION=false
@@ -78,7 +80,8 @@ services:
       - COMPENSATION_SUBSCRIPTION=false
     # restart: always
     volumes:
-      - zeebe:/usr/local/zeebe/data
+      # - zeebe:/usr/local/zeebe/data
+      - D:/Programer_eieiza/GemProject/CAMUNDA_CLONE_PROJECT/ZEEBE-EXPORTER/volumnData/zeebeData:/usr/local/zeebe/data
       - ../exporter/target/jib/zeebe-redis-exporter-jar-with-dependencies.jar:/usr/local/zeebe/exporters/zeebe-redis-exporter-jar-with-dependencies.jar
       - ./application.yaml:/usr/local/zeebe/config/application.yaml
     networks:
@@ -95,6 +98,8 @@ services:
       - REDIS_PASSWORD=exampleRedisPassword
     networks:
       - camunda-platform
+    volumes:
+      - D:/Programer_eieiza/GemProject/CAMUNDA_CLONE_PROJECT/ZEEBE-EXPORTER/volumnData/redisData:/data
 
   operate: # https://docs.camunda.io/docs/self-managed/platform-deployment/docker/#operate
     image: camunda/operate:${CAMUNDA_PLATFORM_VERSION:-8.4.0}
@@ -170,7 +175,8 @@ services:
       timeout: 5s
       retries: 3
     volumes:
-      - elastic:/usr/share/elasticsearch/data
+      # - elastic:/usr/share/elasticsearch/data
+      - D:/Programer_eieiza/GemProject/CAMUNDA_CLONE_PROJECT/ZEEBE-EXPORTER/volumnData/ELKData:/usr/share/elasticsearch/data
     networks:
       - camunda-platform
 

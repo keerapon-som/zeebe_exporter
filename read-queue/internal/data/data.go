@@ -10,8 +10,8 @@ type TasklistTask struct {
 	FlowNodeBPMNID      string
 	FlowNodeInstanceId  string
 	ProcessInstanceID   string
-	CreationTime        string
-	CompletionTime      string
+	CreationTime        int64
+	CompletionTime      int64
 	State               string
 	Assignee            string
 	CandidateGroups     []string
@@ -22,6 +22,7 @@ type TasklistTask struct {
 	IsFormEmbedded      bool
 	FollowupDate        string
 	DueDate             string
+	Position            int64
 }
 
 type TasklistVariables struct {

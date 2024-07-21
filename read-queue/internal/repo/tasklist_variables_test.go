@@ -36,3 +36,37 @@ func TestCreateTable(t *testing.T) {
 		)`
 	ExecSQL(command)
 }
+
+func TestCreateTasklistTaskTable(t *testing.T) {
+	config := config.GetConfig()
+	postgresql.InitDatabase(config.PostgresDB.Postgres_connectionstring)
+
+	command := `
+		CREATE TABLE IF NOT EXISTS public.tasklist_tasks
+		(
+			id character varying NOT NULL,
+			tenantId character varying,
+			key bigint,
+			partitionId integer,
+			bpmnProcessId character varying,
+			processDefinitionId character varying,
+			flowNodeBpmnId character varying,
+			flowNodeInstanceId character varying,
+			processInstanceId character varying,
+			creationTime bigint,
+			completionTime bigint,
+			state character varying,
+			assignee character varying,
+			candidateGroups text[],
+			candidateUsers text[],
+			formKey character varying,
+			formId character varying,
+			formVersion integer,
+			isFormEmbedded boolean,
+			followUpDate character varying,
+			dueDate character varying,
+			position bigint,
+			PRIMARY KEY (id)
+		)`
+	ExecSQL(command)
+}

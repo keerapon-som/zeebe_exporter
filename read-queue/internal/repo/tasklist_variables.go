@@ -17,7 +17,7 @@ type TasklistVariable interface {
 type tasklistVariable struct {
 }
 
-func NewCommonRepo() TasklistVariable {
+func NewVariablesRepo() TasklistVariable {
 	return &tasklistVariable{}
 }
 

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"readq/internal/data"
+	"readq/internal/repo"
 )
 
 type jobManager struct {
@@ -25,8 +26,7 @@ func (m *jobManager) TohistoryTable(jobrecords []JobRecord) {
 
 func (m *jobManager) ToTasklistTaskTable(jobrecords []JobRecord) {
 	var listToTasklistTask []data.TasklistTask
-	var CreationTime string
-	var CompletionTime string
+	repo := repo.NewTasksRepo()
 
 	for _, job := range jobrecords {
 		if job.Type == "io.camunda.zeebe:userTask" {
@@ -34,54 +34,80 @@ func (m *jobManager) ToTasklistTaskTable(jobrecords []JobRecord) {
 			var candidateGroups []string
 			var candidateUsers []string
 
-			// Assuming CustomHeaders is a map[string]interface{} with your data
-			candidateGroupsStr, ok := CustomHeaders["io.camunda.zeebe:candidateGroups"].(string)
-			if ok && candidateGroupsStr != "" {
-				err := json.Unmarshal([]byte(candidateGroupsStr), &candidateGroups)
-				if err != nil {
-					fmt.Printf("Error unmarshalling candidateGroups: %v\n", err)
+			// Safely handle candidateGroups
+			if val, ok := CustomHeaders["io.camunda.zeebe:candidateGroups"]; ok && val != nil {
+				strVal, ok := val.(string)
+				if !ok {
+					// Handle error: value is not a string
+				} else {
+					err := json.Unmarshal([]byte(strVal), &candidateGroups)
+					if err != nil {
+						// Handle error: JSON unmarshaling failed
+					}
 				}
 			}
 
-			candidateUsersStr, ok := CustomHeaders["io.camunda.zeebe:candidateUsers"].(string)
-			if ok && candidateUsersStr != "" {
-				err := json.Unmarshal([]byte(candidateUsersStr), &candidateUsers)
-				if err != nil {
-					fmt.Printf("Error unmarshalling candidateUsers: %v\n", err)
+			// Safely handle candidateUsers
+			if val, ok := CustomHeaders["io.camunda.zeebe:candidateUsers"]; ok && val != nil {
+				strVal, ok := val.(string)
+				if !ok {
+					// Handle error: value is not a string
+				} else {
+					err := json.Unmarshal([]byte(strVal), &candidateUsers)
+					if err != nil {
+						// Handle error: JSON unmarshaling failed
+					}
 				}
 			}
-			if job.Metadata.Intent == "CREATED" {
-				CreationTime = string(job.Metadata.Timestamp)
-			} else if job.Metadata.Intent == "COMPLETED" {
-				CompletionTime = string(job.Metadata.Timestamp)
+
+			var isFormEmbedded bool
+			var formKey string
+			// Safely handle formKey
+			if val, ok := CustomHeaders["io.camunda.zeebe:formKey"]; ok && val != nil {
+				formKey, ok := val.(string)
+				if !ok {
+					// Handle error: value is not a string
+				} else {
+					fmt.Println(formKey)
+					if len(formKey) >= 18 && formKey[0:18] == "camunda-forms:bpmn" {
+						isFormEmbedded = true
+					} else {
+						isFormEmbedded = false
+					}
+				}
 			}
+
 			task := data.TasklistTask{
-				ID:                  string(job.Metadata.Key),
+				ID:                  fmt.Sprintf("%d", job.Metadata.Key),
 				TenantID:            job.TenantId,
 				Key:                 job.Metadata.Key,
 				PartitionID:         int(job.Metadata.PartitionId),
 				BPMNProcessID:       job.BpmnProcessId,
 				ProcessDefinitionID: fmt.Sprintf("%d", job.ProcessDefinitionKey),
 				FlowNodeBPMNID:      job.ElementId,
-				FlowNodeInstanceId:  string(job.ElementInstanceKey),
+				FlowNodeInstanceId:  fmt.Sprintf("%d", job.ElementInstanceKey),
 				ProcessInstanceID:   fmt.Sprintf("%d", job.ProcessInstanceKey),
-				CreationTime:        CreationTime,
-				CompletionTime:      CompletionTime,
+				CreationTime:        job.Metadata.Timestamp,
+				CompletionTime:      job.Metadata.Timestamp,
 				State:               job.Metadata.Intent,
 				Assignee:            CustomHeaders["io.camunda.zeebe:assignee"].(string),
 				CandidateGroups:     candidateGroups,
 				CandidateUsers:      candidateUsers,
-				FormKey:             "",
+				FormKey:             formKey,
 				FormID:              "",
 				FormVersion:         0,
-				IsFormEmbedded:      true,
-				FollowupDate:        "",
-				DueDate:             "",
+				IsFormEmbedded:      isFormEmbedded,
+				FollowupDate:        CustomHeaders["io.camunda.zeebe:followUpDate"].(string),
+				DueDate:             CustomHeaders["io.camunda.zeebe:dueDate"].(string),
+				Position:            job.Metadata.Position,
 			}
 			listToTasklistTask = append(listToTasklistTask, task)
 		}
-		fmt.Println(listToTasklistTask)
+		// fmt.Println(listToTasklistTask)
 	}
+	prettyJsonFormat, _ := json.MarshalIndent(listToTasklistTask, "", "  ")
+	fmt.Println(string(prettyJsonFormat))
+	repo.InsertAndUpdate(listToTasklistTask)
 }
 
 func JobsToDB(pipe chan JobRecord) {
@@ -94,8 +120,8 @@ func JobsToDB(pipe chan JobRecord) {
 		default:
 			fmt.Println("-----Perform Tasklist Task Table-----")
 			go mng.JobManager.ToTasklistTaskTable(batchjobRecords)
-			fmt.Println("-----Perform History Job Table-----")
-			go mng.JobManager.TohistoryTable(batchjobRecords)
+			// fmt.Println("-----Perform History Job Table-----")
+			// go mng.JobManager.TohistoryTable(batchjobRecords)
 			return
 		}
 	}

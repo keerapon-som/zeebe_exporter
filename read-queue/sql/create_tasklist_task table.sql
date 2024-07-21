@@ -2,7 +2,7 @@
 
 -- DROP TABLE IF EXISTS public.job;
 
-CREATE TABLE IF NOT EXISTS public.tasklist_task
+CREATE TABLE IF NOT EXISTS public.tasklist_tasks
 (
 	id character varying NOT NULL,
     tenantId character varying,
@@ -13,8 +13,8 @@ CREATE TABLE IF NOT EXISTS public.tasklist_task
     flowNodeBpmnId character varying,
     flowNodeInstanceId character varying,
     processInstanceId character varying,
-    creationTime character varying,
-    completionTime character varying,
+    creationTime integer,
+    completionTime integer,
     state character varying,
     assignee character varying,
     candidateGroups text[],
@@ -25,5 +25,6 @@ CREATE TABLE IF NOT EXISTS public.tasklist_task
 	isFormEmbedded boolean,
 	followUpDate character varying,
 	dueDate character varying,
+    position integer,
     PRIMARY KEY (id)
 )

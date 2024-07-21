@@ -11,8 +11,8 @@ type Tasklisttask struct {
 	ProcessDefinitionId sql.NullString `db:"processdefinitionid"`
 	FlowNodeBPMNId      sql.NullString `db:"flownodebpmnid"`
 	ProcessInstanceId   sql.NullString `db:"processinstanceid"`
-	CreationTime        sql.NullString `db:"creationtime"`
-	CompletionTime      sql.NullString `db:"completiontime"`
+	CreationTime        sql.NullTime   `db:"creationtime"`
+	CompletionTime      sql.NullTime   `db:"completiontime"`
 	Assignee            sql.NullString `db:"assignee"`
 	CandidateGroups     []string       `db:"candidategroups"`
 	CandidateUsers      []string       `db:"candidateusers"`
@@ -22,6 +22,7 @@ type Tasklisttask struct {
 	IsFormEmbedded      bool           `db:"isformembedded"`
 	FollowupDate        sql.NullString `db:"followupdate"`
 	DueDate             sql.NullString `db:"duedate"` // Changed to sql.NullString
+	Position            int64          `db:"position"`
 }
 
 type Tasklistvariables struct {

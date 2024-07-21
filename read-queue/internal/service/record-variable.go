@@ -25,7 +25,7 @@ func (m *variableManager) TohistoryTable(variableRecords []VariableRecord) {
 }
 
 func (m *variableManager) ToTasklistVariablesTable(variableRecords []VariableRecord) {
-	repo := repo.NewCommonRepo()
+	repo := repo.NewVariablesRepo()
 
 	var records []data.TasklistVariables
 
@@ -68,7 +68,7 @@ func VariablesToDB(pipe chan VariableRecord) {
 			// jobmng.ToTasklistTaskTable(batchjobRecords)
 			// fmt.Println("-----Perform History Variable Table-----")
 			// mng.VariableManager.TohistoryTable(batchVariableRecords)
-			// mng.VariableManager.ToTasklistVariablesTable(batchVariableRecords)
+			mng.VariableManager.ToTasklistVariablesTable(batchVariableRecords)
 			return
 		}
 	}
