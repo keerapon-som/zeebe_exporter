@@ -42,6 +42,8 @@ public class RedisExporter implements Exporter {
 
     @Override
     public void configure(Context context) {
+        final RecordFilter filter = new RecordFilter();
+        context.setFilter(filter);
     }
 
     public void startSavingRecordPosition() {
@@ -120,6 +122,15 @@ public class RedisExporter implements Exporter {
             System.out.println(record.toJson());
             recordPosition = record.getPosition();
             sqsSender.sendForm(record); // ฟังก์ชั่นส่งข้อมูลไป SQS
+        }
+    }
+
+    @Override
+    public void close() {
+        System.out.println("Close RedisExporter");
+        if (redisConnected) {
+            scheduler.shutdown();
+            redis.close();
         }
     }
 }

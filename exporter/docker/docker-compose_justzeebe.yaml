@@ -1,0 +1,54 @@
+version: '3.7'
+
+services:
+  zeebe-broker:
+    container_name: zeebe_broker_0
+    image: camunda/zeebe:latest
+    ports:
+      - "26500:26500"
+      - "9600:9600"
+    environment:
+      - ZEEBE_BROKER_CLUSTER_NODEID=0
+      - ZEEBE_BROKER_CLUSTER_INITIALCONTACTPOINTS=zeebe-broker-1:26502,zeebe-broker-2:26502,zeebe-broker-3:26502
+      - ZEEBE_BROKER_CLUSTER_PARTITIONSCOUNT=4
+      - ZEEBE_BROKER_CLUSTER_REPLICATIONFACTOR=4
+      - ZEEBE_BROKER_CLUSTER_CLUSTERSIZE=4
+
+  zeebe-broker-1:
+    container_name: zeebe_broker_1
+    image: camunda/zeebe:latest
+    ports:
+      - "26501:26500"
+      - "9601:9600"
+    environment:
+      - ZEEBE_BROKER_CLUSTER_NODEID=1
+      - ZEEBE_BROKER_CLUSTER_INITIALCONTACTPOINTS=zeebe-broker:26502,zeebe-broker-2:26502,zeebe-broker-3:26502
+      - ZEEBE_BROKER_CLUSTER_PARTITIONSCOUNT=4
+      - ZEEBE_BROKER_CLUSTER_REPLICATIONFACTOR=1
+      - ZEEBE_BROKER_CLUSTER_CLUSTERSIZE=4
+
+  zeebe-broker-2:
+    container_name: zeebe_broker_2
+    image: camunda/zeebe:latest
+    ports:
+      - "26502:26500"
+      - "9602:9600"
+    environment:
+      - ZEEBE_BROKER_CLUSTER_NODEID=2
+      - ZEEBE_BROKER_CLUSTER_INITIALCONTACTPOINTS=zeebe-broker:26502,zeebe-broker-1:26502,zeebe-broker-3:26502
+      - ZEEBE_BROKER_CLUSTER_PARTITIONSCOUNT=4
+      - ZEEBE_BROKER_CLUSTER_REPLICATIONFACTOR=1
+      - ZEEBE_BROKER_CLUSTER_CLUSTERSIZE=4
+
+  zeebe-broker-3:
+    container_name: zeebe_broker_3
+    image: camunda/zeebe:latest
+    ports:
+      - "26503:26500"
+      - "9603:9600"
+    environment:
+      - ZEEBE_BROKER_CLUSTER_NODEID=3
+      - ZEEBE_BROKER_CLUSTER_INITIALCONTACTPOINTS=zeebe-broker:26502,zeebe-broker-1:26502,zeebe-broker-2:26502
+      - ZEEBE_BROKER_CLUSTER_PARTITIONSCOUNT=4
+      - ZEEBE_BROKER_CLUSTER_REPLICATIONFACTOR=1
+      - ZEEBE_BROKER_CLUSTER_CLUSTERSIZE=4

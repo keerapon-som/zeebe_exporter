@@ -1,13 +1,4 @@
-# While the Docker images themselves are supported for production usage,
-# this docker-compose.yaml is designed to be used by developers to run
-# an environment locally. It is not designed to be used in production.
-# We recommend to use Kubernetes in production with our Helm Charts:
-# https://docs.camunda.io/docs/self-managed/platform-deployment/kubernetes-helm/
-# For local development, we recommend using KIND instead of `docker-compose`:
-# https://docs.camunda.io/docs/self-managed/platform-deployment/helm-kubernetes/guides/local-kubernetes-cluster/
-
-# This is a full configuration with Zeebe, Operate, Tasklist, Optimize, Identity, Keycloak, and Elasticsearch
-# See docker-compose-core.yml for a lightweight configuration that does not include Optimize, Identity, and Keycloak.
+version: '3.7'
 
 services:
   postgresql:
@@ -23,22 +14,25 @@ services:
     volumes:
       - D:/Programer_eieiza/GemProject/CAMUNDA_CLONE_PROJECT/ZEEBE-EXPORTER/volumnData/postgresData:/var/lib/postgresql/data
 
-  zeebe: # https://docs.camunda.io/docs/self-managed/platform-deployment/docker/#zeebe
-    image: camunda/zeebe:${CAMUNDA_PLATFORM_VERSION:-8.4.0}
-    container_name: zeebe
+  zeebe-broker: # https://docs.camunda.io/docs/self-managed/platform-deployment/docker/#zeebe
+    image: camunda/zeebe:latest
     ports:
       - "26500:26500"
       - "9600:9600"
     environment: # https://docs.camunda.io/docs/self-managed/zeebe-deployment/configuration/environment-variables/
-      - ZEEBE_BROKER_EXPORTERS_ELASTICSEARCH_CLASSNAME=io.camunda.zeebe.exporter.ElasticsearchExporter
-      - ZEEBE_BROKER_EXPORTERS_ELASTICSEARCH_ARGS_URL=http://elasticsearch:9200
-      - ZEEBE_BROKER_EXPORTERS_ELASTICSEARCH_ARGS_BULK_SIZE=1
-      # allow running with low disk space
-      - ZEEBE_BROKER_DATA_DISKUSAGECOMMANDWATERMARK=0.998
-      - ZEEBE_BROKER_DATA_DISKUSAGEREPLICATIONWATERMARK=0.999
-      - "JAVA_TOOL_OPTIONS=-Xms512m -Xmx512m"
-      - ZEEBE_LOG_LEVEL=debug
-      - ROLE_SESSION_NAME=DigitalsolutionDevopsTeam
+      # - ZEEBE_BROKER_EXPORTERS_ELASTICSEARCH_CLASSNAME=io.camunda.zeebe.exporter.ElasticsearchExporter
+      # - ZEEBE_BROKER_EXPORTERS_ELASTICSEARCH_ARGS_URL=http://elasticsearch:9200
+      # - ZEEBE_BROKER_EXPORTERS_ELASTICSEARCH_ARGS_BULK_SIZE=1
+      # # allow running with low disk space
+      # - ZEEBE_BROKER_DATA_DISKUSAGECOMMANDWATERMARK=0.998
+      # - ZEEBE_BROKER_DATA_DISKUSAGEREPLICATIONWATERMARK=0.999
+      # - ZEEBE_BROKER_DATA_LOGSEGMENTSIZE=512MB
+      # - ZEEBE_BROKER_DATA_SNAPSHOTPERIOD=1m
+      # - ZEEBE_BROKER_DATA_DISK_FREESPACE_PROCESSING=2GB
+      # - ZEEBE_BROKER_DATA_DISK_FREESPACE_REPLICATION=2GB
+      # - "JAVA_TOOL_OPTIONS=-Xms512m -Xmx512m"
+      # - ZEEBE_LOG_LEVEL=debug
+      # - ROLE_SESSION_NAME=DigitalsolutionDevopsTeam
       - RECORD_POSITION_KEY_NAME=gem_key_test
       - REDIS_HOST=host.docker.internal
       - REDIS_PORT=6379
@@ -88,18 +82,6 @@ services:
       - camunda-platform
     depends_on:
       - elasticsearch
-  
-  redis:
-    image: redis:latest
-    command: redis-server --requirepass exampleRedisPassword
-    ports:
-      - "6379:6379"
-    environment:
-      - REDIS_PASSWORD=exampleRedisPassword
-    networks:
-      - camunda-platform
-    volumes:
-      - D:/Programer_eieiza/GemProject/CAMUNDA_CLONE_PROJECT/ZEEBE-EXPORTER/volumnData/redisData:/data
 
   operate: # https://docs.camunda.io/docs/self-managed/platform-deployment/docker/#operate
     image: camunda/operate:${CAMUNDA_PLATFORM_VERSION:-8.4.0}
@@ -131,25 +113,25 @@ services:
       - zeebe
       - elasticsearch
     
-  optimize:
-    container_name: optimize
-    image: camunda/optimize:${CAMUNDA_PLATFORM_VERSION:-8.4.0}
-    ports:
-        - 8090:8090
-    environment:
-        - SPRING_PROFILES_ACTIVE=ccsm
-        - CAMUNDA_OPTIMIZE_IAM_ISSUER_URL=http://localhost:9090
-        - CAMUNDA_OPTIMIZE_IAM_CLIENTID=optimize
-        - CAMUNDA_OPTIMIZE_IAM_CLIENTSECRET=secret
-        - OPTIMIZE_ELASTICSEARCH_HOST=localhost
-        - OPTIMIZE_ELASTICSEARCH_HTTP_PORT=9200
-        - CAMUNDA_OPTIMIZE_SECURITY_AUTH_COOKIE_SAME_SITE_ENABLED=false
-        - CAMUNDA_OPTIMIZE_ENTERPRISE=false
-        - CAMUNDA_OPTIMIZE_ZEEBE_ENABLED=false
-        - CAMUNDA_OPTIMIZE_ZEEBE_NAME=zeebe-record
-        - CAMUNDA_OPTIMIZE_ZEEBE_PARTITION_COUNT=1
-        - CAMUNDA_OPTIMIZE_SHARING_ENABLED=false
-        - CAMUNDA_OPTIMIZE_UI_LOGOUT_HIDDEN=false
+  # optimize:
+  #   container_name: optimize
+  #   image: camunda/optimize:${CAMUNDA_PLATFORM_VERSION:-8.4.0}
+  #   ports:
+  #       - 8090:8090
+  #   environment:
+  #       - SPRING_PROFILES_ACTIVE=ccsm
+  #       - CAMUNDA_OPTIMIZE_IAM_ISSUER_URL=http://localhost:9090
+  #       - CAMUNDA_OPTIMIZE_IAM_CLIENTID=optimize
+  #       - CAMUNDA_OPTIMIZE_IAM_CLIENTSECRET=secret
+  #       - OPTIMIZE_ELASTICSEARCH_HOST=localhost
+  #       - OPTIMIZE_ELASTICSEARCH_HTTP_PORT=9200
+  #       - CAMUNDA_OPTIMIZE_SECURITY_AUTH_COOKIE_SAME_SITE_ENABLED=false
+  #       - CAMUNDA_OPTIMIZE_ENTERPRISE=false
+  #       - CAMUNDA_OPTIMIZE_ZEEBE_ENABLED=false
+  #       - CAMUNDA_OPTIMIZE_ZEEBE_NAME=zeebe-record
+  #       - CAMUNDA_OPTIMIZE_ZEEBE_PARTITION_COUNT=1
+  #       - CAMUNDA_OPTIMIZE_SHARING_ENABLED=false
+  #       - CAMUNDA_OPTIMIZE_UI_LOGOUT_HIDDEN=false
 
   elasticsearch: # https://hub.docker.com/_/elasticsearch
     image: docker.elastic.co/elasticsearch/elasticsearch:${ELASTIC_VERSION:-8.13.0}
@@ -180,22 +162,10 @@ services:
     networks:
       - camunda-platform
 
-  kibana:
-    image: docker.elastic.co/kibana/kibana:${ELASTIC_VERSION:-8.13.0}
-    container_name: kibana
-    environment:
-      - elasticsearch.hosts=http://localhost:9200
-    ports:
-      - 5601:5601
-    networks:
-      - camunda-platform
-    depends_on:
-      - elasticsearch
-
 volumes:
-  zeebe:
+  zeebe-broker:
   elastic:
-  kibana:
+
 
 # networks:
 #   # Note there are two bridge networks: One for Camunda Platform and one for Identity.
